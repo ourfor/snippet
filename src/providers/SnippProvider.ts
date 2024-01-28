@@ -176,8 +176,16 @@ export class SnippExplorer {
       const editor = vscode.window.activeTextEditor;
       if (editor && snippDataProvider.isSnipp(snipp)) {
         const position = editor?.selection.active;
+        const doc = editor?.document
+        const text = doc.getText(editor?.selection)
         editor.edit((edit) => {
-          edit.insert(position, snipp.content || "");
+          const content = snipp.content.replace("%SELECTION%", text)
+          const selection = editor?.selection
+          if (selection) {
+            edit.replace(selection, content || "");
+          } else {
+            edit.replace(position, content || "");
+          }
         });
       } else if (editor && !snippDataProvider.isSnipp(snipp)) {
         vscode.window.showErrorMessage(
